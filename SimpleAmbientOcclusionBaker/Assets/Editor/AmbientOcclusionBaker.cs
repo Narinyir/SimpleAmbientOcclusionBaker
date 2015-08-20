@@ -4,6 +4,8 @@ using UnityEngine;
 public class AmbientOcclusionBaker : ScriptableWizard
 {
     public int sampleCount = 250;
+    public float coneAngle = 30;
+    public float shadowStrength = 1;
 
     Vector3[] directions;
 
@@ -58,8 +60,16 @@ public class AmbientOcclusionBaker : ScriptableWizard
 
         for (int i = 0; i < sampleCount; i++)
         {
-            Vector3 direction = Random.onUnitSphere;
-            direction.y = Mathf.Abs(direction.y);
+            Vector3 direction;
+            float angle;
+
+            do
+            {
+                direction = Random.onUnitSphere;
+                direction.y = Mathf.Abs(direction.y);
+                angle = Vector3.Angle(direction, Vector3.up);
+            } while (angle > coneAngle);
+
             directions[i] = direction;
         }
 
@@ -76,7 +86,7 @@ public class AmbientOcclusionBaker : ScriptableWizard
             minDistance = Mathf.Min(minDistance, worldPosition.z - bounds.min.z);
             minDistance = Mathf.Min(minDistance, bounds.max.z - worldPosition.z);
             minDistance = Mathf.Min(minDistance, 2) / 2;
-            color.a *= minDistance;
+            color.a *= minDistance * shadowStrength;
 
             newColors[i] = color;
         }
